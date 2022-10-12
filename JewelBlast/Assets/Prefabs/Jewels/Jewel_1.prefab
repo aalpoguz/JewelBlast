@@ -102,6 +102,11 @@ MonoBehaviour:
   board: {fileID: 0}
   firstTouchedPos: {x: 0, y: 0}
   lastTouchedPos: {x: 0, y: 0}
+  isMatch: 0
+  jewelEffect: {fileID: 9152049248813883939, guid: 8bbb46f4ef4042d4d89a3cf23633bfd5, type: 3}
+  bombVolume: 2
+  scoreValue: 30
+  type: 0
 --- !u!61 &2315560897378155181
 BoxCollider2D:
   m_ObjectHideFlags: 0

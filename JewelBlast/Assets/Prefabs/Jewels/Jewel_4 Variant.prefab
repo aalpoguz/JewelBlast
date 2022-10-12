@@ -11,6 +11,14 @@ PrefabInstance:
       propertyPath: type
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 1275402419196877125, guid: 2cb1001a4aab0fa4cbe04a13563c43e8, type: 3}
+      propertyPath: scoreValue
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 1275402419196877125, guid: 2cb1001a4aab0fa4cbe04a13563c43e8, type: 3}
+      propertyPath: jewelEffect
+      value: 
+      objectReference: {fileID: 4143814701643273659, guid: 38eb1b6fdecfc1046a56fd8d98f65bf8, type: 3}
     - target: {fileID: 4283598892712710300, guid: 2cb1001a4aab0fa4cbe04a13563c43e8, type: 3}
       propertyPath: m_RootOrder
       value: 0

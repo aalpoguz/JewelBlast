@@ -22,9 +22,15 @@ public class Jewels : MonoBehaviour
 
     Vector2Int firstPos;
 
+    public GameObject jewelEffect;
+
+    public int bombVolume;
+
+    public int scoreValue;
 
 
-    public enum JewelType { blue, pink, yellow, green, darkerGreen };
+
+    public enum JewelType { blue, pink, yellow, green, darkerGreen, bomb };
     public JewelType type;
 
     private void Update()
@@ -41,10 +47,13 @@ public class Jewels : MonoBehaviour
 
         if (isClicked == true && Input.GetMouseButtonUp(0))
         {
-
             isClicked = false;
-            lastTouchedPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            angelCalculate();
+
+            if (board.currentStatus == Board.BoardStatus.moving)
+            {
+                lastTouchedPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                angelCalculate();
+            }
 
         }
     }
@@ -58,8 +67,12 @@ public class Jewels : MonoBehaviour
 
     private void OnMouseDown()
     {
-        firstTouchedPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        isClicked = true;
+        if (board.currentStatus == Board.BoardStatus.moving)
+        {
+            firstTouchedPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            isClicked = true;
+        }
+
     }
 
     void angelCalculate()
@@ -119,20 +132,25 @@ public class Jewels : MonoBehaviour
     public IEnumerator MoveControl()
     {
 
+        board.currentStatus = Board.BoardStatus.waiting;
         yield return new WaitForSeconds(.5f);
         board.matchController.FindMatches();
         if (otherJewel != null)
         {
             if (!isMatch && !otherJewel.isMatch)
             {
+
                 otherJewel.posIndex = posIndex;
                 posIndex = firstPos;
 
                 board.allJewels[posIndex.x, posIndex.y] = this;
                 board.allJewels[otherJewel.posIndex.x, otherJewel.posIndex.y] = otherJewel;
+
+                yield return new WaitForSeconds(.5f);
+                board.currentStatus = Board.BoardStatus.moving;
             }
             else
-            { 
+            {
                 board.allMatchesDestroy();
             }
         }

@@ -13,6 +13,15 @@ public class Board : MonoBehaviour
     public float jewelSpeed;
     public MatchController matchController;
 
+    public enum BoardStatus { waiting, moving };
+
+    public BoardStatus currentStatus = BoardStatus.moving;
+
+
+    public Jewels bomb;
+    public float bombChance = 2f;
+
+
     private void Awake()
     {
         matchController = Object.FindObjectOfType<MatchController>();
@@ -27,10 +36,7 @@ public class Board : MonoBehaviour
         EditFunction();
     }
 
-    private void Update()
-    {
-        matchController.FindMatches();
-    }
+
 
     public void EditFunction()
     {
@@ -67,7 +73,12 @@ public class Board : MonoBehaviour
 
     public void createJewels(Vector2Int pos, Jewels generateJewels)
     {
-        Jewels jewel = Instantiate(generateJewels, new Vector3(pos.x, pos.y+height, 0f), Quaternion.identity);
+        if (Random.Range(0f, 100f) < bombChance)
+        {
+            generateJewels = bomb;
+        }
+
+        Jewels jewel = Instantiate(generateJewels, new Vector3(pos.x, pos.y + height, 0f), Quaternion.identity);
         jewel.transform.parent = this.transform;
         jewel.name = "Jewels - " + pos.x + ", " + pos.y;
 
@@ -105,6 +116,19 @@ public class Board : MonoBehaviour
         {
             if (allJewels[pos.x, pos.y].isMatch)
             {
+
+                if(allJewels[pos.x, pos.y].type == Jewels.JewelType.bomb)
+                {
+                    SoundManager.instance.blastVoiceEff();
+                }
+                else
+                {
+                    SoundManager.instance.jewelVoiceEff();
+                }
+                
+
+                Instantiate(allJewels[pos.x, pos.y].jewelEffect, new Vector2(pos.x, pos.y), Quaternion.identity);
+
                 Destroy(allJewels[pos.x, pos.y].gameObject);
                 allJewels[pos.x, pos.y] = null;
             }
@@ -117,6 +141,7 @@ public class Board : MonoBehaviour
         {
             if (matchController.FoundedJewelList[i] != null)
             {
+                UIManager.instance.increaseScore(matchController.FoundedJewelList[i].scoreValue);
                 MatchedJewelDestroy(matchController.FoundedJewelList[i].posIndex);
             }
         }
@@ -162,8 +187,13 @@ public class Board : MonoBehaviour
 
         if (matchController.FoundedJewelList.Count > 0)
         {
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(.5f);
             allMatchesDestroy();
+        }
+        else
+        {
+            yield return new WaitForSeconds(.5f);
+            currentStatus = BoardStatus.moving;
         }
     }
 
@@ -209,6 +239,47 @@ public class Board : MonoBehaviour
         }
     }
 
+    public void BoardMix()
+    {
+        if (currentStatus != BoardStatus.waiting)
+        {
+            currentStatus = BoardStatus.waiting;
 
+            List<Jewels> sceneJewelsList = new List<Jewels>();
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    sceneJewelsList.Add(allJewels[x, y]);
+                    allJewels[x, y] = null;
+
+
+                }
+            }
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int willUseJewel = Random.Range(0, sceneJewelsList.Count);
+                    
+                    int controlCounter = 0; //while kontrolü
+
+                    while (isMatchFunction(new Vector2Int(x, y), sceneJewelsList[willUseJewel]) && controlCounter<100 && sceneJewelsList.Count>1)
+                     {
+                        willUseJewel = Random.Range(0, sceneJewelsList.Count);
+
+                        controlCounter++;
+                     }
+
+                     sceneJewelsList[willUseJewel].EditJewel(new Vector2Int(x,y), this);
+                     allJewels[x,y] = sceneJewelsList[willUseJewel];
+                     sceneJewelsList.RemoveAt(willUseJewel);
+                }
+            }
+            StartCoroutine(SlideDown());
+        }
+    }
 
 }
